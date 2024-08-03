@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Video Call</title>
+</head>
+<body>
+  <h1>Video Call</h1>
+  <video id="localVideo" autoplay></video>
+  <video id="remoteVideo" autoplay></video>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://unpkg.com/simple-peer/simplepeer.min.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const username = urlParams.get('username');
+    const socket = io();
+    let localStream;
+    let peer;
+
+    socket.emit('joinCall', username);
+
+    socket.on('call', (data) => {
+      if (!peer) {
+        startCall(data.id);
+      }
+    });
+
+    socket.on('signal', (data) => {
+      peer.signal(data.signal);
+    });
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => {
+        localStream = stream;
+        document.getElementById('localVideo').srcObject = stream;
+      });
+
+    function startCall(id) {
+      peer = new SimplePeer({ initiator: true, stream: localStream });
+
+      peer.on('signal', (signal) => {
+        socket.emit('signal', { signal, id });
+      });
+
+      peer.on('stream', (stream) => {
+        document.getElementById('remoteVideo').srcObject = stream;
+      });
+    }
+  </script>
+</body>
+</html>

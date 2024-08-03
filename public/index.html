@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Video Call Website</title>
+</head>
+<body>
+  <h1>Welcome to the Video Call Website</h1>
+  <p>Number of users currently using the website: <span id="userCount">0</span></p>
+  <button onclick="joinCall()">Join Random Video Call</button>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    socket.on('userCount', (count) => {
+      document.getElementById('userCount').innerText = count;
+    });
+
+    function joinCall() {
+      const username = prompt('Enter your username:');
+      if (username) {
+        window.location.href = `/call.html?username=${username}`;
+      }
+    }
+  </script>
+</body>
+</html>
